@@ -1,4 +1,6 @@
-*Maze solver using genetic algorithm*
+# Maze solver using genetic algorithm
 
-*To-do list*
-- Adapt maze generator
+## Requirements
+```
+pip install -r requirements.txt
+```
