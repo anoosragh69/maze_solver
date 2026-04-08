@@ -11,6 +11,17 @@ def move(pos, d):
     if d == 'N': return (pos[0] - 1, pos[1])
     if d == 'S': return (pos[0] + 1, pos[1])
 
+def fitness(moves, m):
+    pos = (m.rows, m.cols)
+    goal = (1,1)
+
+    for d in moves:
+        if m.maze_map[pos][d] == 1:
+            pos = move(pos, d)
+
+    # Manhattan distance to goal
+    return abs(pos[0]-goal[0]) + abs(pos[1]-goal[1])
+
 # --- convert moves to path ---
 def to_path(ch, m):
     pos = (m.rows, m.cols)
@@ -41,15 +52,24 @@ def generate_valid_moves(m, steps=20):
 
     return moves
 
-moves = generate_valid_moves(m)
+# --- generate population ---
+population = [generate_valid_moves(m, steps=40) for _ in range(20)]
 
-print("Moves:", moves)
+# --- evaluate ---
+scores = [(moves, fitness(moves, m)) for moves in population]
+scores.sort(key=lambda x: x[1])  # lower is better
+
+# --- best solution ---
+best_moves = scores[0][0]
+
+print("Best fitness:", scores[0][1])
+print("Best moves:", best_moves)
 
 # --- agent ---
 a = agent(m, footprints=True)
 
 # --- build path ---
-path = to_path(moves, m)
+path = to_path(best_moves, m)
 
 print("Path:", path)
 
