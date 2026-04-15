@@ -17,6 +17,7 @@ def extract_pareto_solutions(final_population):
             'time': by_time[0]['time'],
             'cost': by_time[0]['cost'],
             'fitness': by_time[0]['fitness'],
+            'path_length': by_time[0].get('path_length', len(by_time[0]['moves'])),
             'label': 'Time-Optimized (Fastest)'
         },
         'cheapest': {
@@ -24,6 +25,7 @@ def extract_pareto_solutions(final_population):
             'time': by_cost[0]['time'],
             'cost': by_cost[0]['cost'],
             'fitness': by_cost[0]['fitness'],
+            'path_length': by_cost[0].get('path_length', len(by_cost[0]['moves'])),
             'label': 'Cost-Optimized (Cheapest)'
         },
         'balanced': {
@@ -31,6 +33,7 @@ def extract_pareto_solutions(final_population):
             'time': by_fitness[0]['time'],
             'cost': by_fitness[0]['cost'],
             'fitness': by_fitness[0]['fitness'],
+            'path_length': by_fitness[0].get('path_length', len(by_fitness[0]['moves'])),
             'label': 'Balanced (Best Fitness)'
         }
     }
@@ -49,7 +52,7 @@ def print_solution_comparison(solutions):
         print(f"  Time Cost:     {solution['time']:.2f}")
         print(f"  Money Cost:    {solution['cost']:.2f}")
         print(f"  Combined Fitness: {solution['fitness']:.2f}")
-        print(f"  Path Length:   {len(solution['moves'])} moves")
+        print(f"  Path Length:   {solution.get('path_length', len(solution['moves']))} moves")
     
     # Calculate trade-offs
     fastest_cost = solutions['fastest']['cost']

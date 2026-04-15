@@ -23,13 +23,19 @@ def calculate_path_metrics(moves, maze_obj):
             if pos == goal:
                 reached_goal = True
                 break
+        else:
+            # Penalize running into walls so it doesn't "cheat" by staying still
+            total_time += 2.0
+            total_cost += 2.0
     
     # Penalty for not reaching goal
     if not reached_goal:
         manhattan = abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
-        total_time += manhattan * 10  # Heavy penalty
-        total_cost += manhattan * 5
-    
+        # Massive penalty so reaching the goal is ALWAYS strictly better
+        # than stopping short, even if the path there is very expensive.
+        total_time += manhattan * 100.0  
+        total_cost += manhattan * 100.0
+        
     return total_time, total_cost, path_length
 
 def combined_fitness(moves, maze_obj, alpha=0.5, normalize=True):
@@ -59,7 +65,7 @@ def combined_fitness(moves, maze_obj, alpha=0.5, normalize=True):
     # Weighted combination
     fitness_score = (1 - alpha) * normalized_time + alpha * normalized_cost
     
-    return fitness_score, total_time, total_cost
+    return fitness_score, total_time, total_cost, path_length
 
 def fitness_time_optimized(moves, maze_obj):
     """Extract time metric (for selecting fastest path)"""

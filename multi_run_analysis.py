@@ -21,8 +21,6 @@ def run_multiple_ga_experiments(maze_obj, alpha_values=[0.0, 0.5, 1.0]):
         
         final_pop, ga_history = run_ga_multi_objective(
             maze_obj,
-            generations=50,
-            population_size=20,
             alpha=alpha
         )
         
@@ -41,23 +39,33 @@ def compare_experiments(experiments):
     """Compare results across different α values"""
     
     print("\n" + "="*80)
-    print("CROSS-EXPERIMENT ANALYSIS")
+    print("OVERALL OPTIMAL ROUTES DISCOVERED")
     print("="*80)
     
-    print("\nFastest Paths by α-value:")
-    print(f"{'α':>6} | {'Time':>8} | {'Cost':>8} | {'Fitness':>8}")
-    print("-" * 40)
+    # Extract the absolute best path found by each priority run
+    # Since elitism converges heavily, the fastest/cheapest in a run are the same.
+    opt_time = experiments[0.0]['solutions']['fastest']
+    opt_balanced = experiments[0.5]['solutions']['balanced']
+    opt_cost = experiments[1.0]['solutions']['cheapest']
     
-    for alpha in sorted(experiments.keys()):
-        fastest = experiments[alpha]['solutions']['fastest']
-        print(f"{alpha:>6.1f} | {fastest['time']:>8.2f} | {fastest['cost']:>8.2f} | {fastest['fitness']:>8.2f}")
+    print("\n1. FASTEST ROUTE (Time Priority)")
+    print(f"   Time Taken:  {opt_time['time']:.2f}")
+    print(f"   Money Cost:  {opt_time['cost']:.2f}")
+    print(f"   True Length: {opt_time['path_length']} moves")
     
-    print("\nCheapest Paths by α-value:")
-    print(f"{'α':>6} | {'Time':>8} | {'Cost':>8} | {'Fitness':>8}")
-    print("-" * 40)
+    print("\n2. BALANCED ROUTE (Equal Priority)")
+    print(f"   Time Taken:  {opt_balanced['time']:.2f}")
+    print(f"   Money Cost:  {opt_balanced['cost']:.2f}")
+    print(f"   True Length: {opt_balanced['path_length']} moves")
     
-    for alpha in sorted(experiments.keys()):
-        cheapest = experiments[alpha]['solutions']['cheapest']
-        print(f"{alpha:>6.1f} | {cheapest['time']:>8.2f} | {cheapest['cost']:>8.2f} | {cheapest['fitness']:>8.2f}")
+    print("\n3. CHEAPEST ROUTE (Cost Priority)")
+    print(f"   Time Taken:  {opt_cost['time']:.2f}")
+    print(f"   Money Cost:  {opt_cost['cost']:.2f}")
+    print(f"   True Length: {opt_cost['path_length']} moves")
     
-    print("\n" + "="*80 + "\n")
+    print("\n" + "-"*80)
+    print("Trade-off Summary:")
+    print(f"  By choosing FASTEST over CHEAPEST, you save "
+          f"{opt_cost['time'] - opt_time['time']:.2f} Time, "
+          f"but pay {opt_time['cost'] - opt_cost['cost']:.2f} extra Cost.")
+    print("="*80 + "\n")

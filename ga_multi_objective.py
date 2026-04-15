@@ -49,7 +49,7 @@ def mutate(population, rate=0.2):
     
     return population
 
-def run_ga_multi_objective(maze_obj, generations=50, population_size=20, alpha=0.5):
+def run_ga_multi_objective(maze_obj, generations=150, population_size=100, alpha=0.5):
     """
     Run GA with multi-objective fitness
     
@@ -65,7 +65,7 @@ def run_ga_multi_objective(maze_obj, generations=50, population_size=20, alpha=0
     """
     
     # Initialize population
-    population = [generate_valid_moves(maze_obj, steps=40) for _ in range(population_size)]
+    population = [generate_valid_moves(maze_obj, steps=200) for _ in range(population_size)]
     
     ga_state = GAState()
     
@@ -77,7 +77,7 @@ def run_ga_multi_objective(maze_obj, generations=50, population_size=20, alpha=0
         # Evaluate fitness for all individuals
         scores = []
         for moves in population:
-            fitness_val, time_val, cost_val = combined_fitness(
+            fitness_val, time_val, cost_val, p_len = combined_fitness(
                 moves, maze_obj, alpha=alpha
             )
             scores.append({
@@ -103,23 +103,28 @@ def run_ga_multi_objective(maze_obj, generations=50, population_size=20, alpha=0
         # Selection: keep top performers
         top_performers = [s['moves'] for s in scores[:5]]
         
-        # Crossover
-        children = crossover(top_performers, population_size)
+        # Elitism: pass the absolute best individuals directly to the next generation untouched!
+        # This prevents the GA from "forgetting" the best paths when crossover destroys them.
+        next_gen = top_performers[:]
         
-        # Mutation
-        population = mutate(children, rate=0.2)
+        # Crossover & Mutation for the rest of the population
+        children = crossover(top_performers, population_size - len(next_gen))
+        children = mutate(children, rate=0.2)
+        
+        population = next_gen + children
     
     # Final evaluation
     final_scores = []
     for moves in population:
-        fitness_val, time_val, cost_val = combined_fitness(
+        fitness_val, time_val, cost_val, p_len = combined_fitness(
             moves, maze_obj, alpha=alpha
         )
         final_scores.append({
             'moves': moves,
             'fitness': fitness_val,
             'time': time_val,
-            'cost': cost_val
+            'cost': cost_val,
+            'path_length': p_len
         })
     
     final_scores.sort(key=lambda x: x['fitness'])
