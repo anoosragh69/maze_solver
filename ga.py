@@ -3,6 +3,7 @@ from utils import move
 
 GOAL_REACHED_FITNESS_ADJUSTMENT = -5
 ELITE_RATIO = 0.2
+INVALID_PATH_PENALTY = 1000
 
 def trace_moves(moves, m):
     pos = (m.rows, m.cols)
@@ -94,6 +95,7 @@ def mutate(population, m, rate=0.2):
 
 
 def run_ga(m, generations=30, population_size=20, max_path_length=40):
+    population_size = max(2, population_size)
     population = [generate_valid_moves(m, steps=max_path_length) for _ in range(population_size)]
 
     for gen in range(generations):
@@ -103,7 +105,7 @@ def run_ga(m, generations=30, population_size=20, max_path_length=40):
         print(f"Gen {gen} Best:", scores[0][1])
 
         desired_elites = max(1, int(population_size * ELITE_RATIO))
-        max_elites = max(1, population_size - 1)
+        max_elites = max(1, population_size - 2)
         elite_count = min(desired_elites, max_elites)
         elites = [list(moves) for moves, _ in scores[:elite_count]]
         # Keep one slot for an immigrant to preserve exploration diversity.
@@ -117,7 +119,7 @@ def run_ga(m, generations=30, population_size=20, max_path_length=40):
     return [repair_moves(chrom, m, max_steps=max_path_length) for chrom in population]
 
 
-def evaluate_population(population, m, time_penalties, cost_penalties, invalid_penalty=1000):
+def evaluate_population(population, m, time_penalties, cost_penalties, invalid_penalty=INVALID_PATH_PENALTY):
     evaluations = []
 
     for moves in population:
