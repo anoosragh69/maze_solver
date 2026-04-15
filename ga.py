@@ -126,6 +126,7 @@ def evaluate_population(population, m, time_penalties, cost_penalties, invalid_p
         cells, _, reached_goal = trace_moves(moves, m)
         steps = max(0, len(cells) - 1)
         # Exclude the start cell from penalties; only traversed maze regions add penalties.
+        # Non-goal-reaching paths are still discouraged by invalid_penalty below.
         time_penalty = sum(time_penalties.get(cell, 0) for cell in cells[1:])
         cost_penalty = sum(cost_penalties.get(cell, 0) for cell in cells[1:])
         total_time = steps + time_penalty

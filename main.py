@@ -6,6 +6,8 @@ from ga import run_ga, evaluate_population, extract_solutions
 GA_GENERATIONS = 40
 GA_POPULATION_SIZE = 40
 GA_MAX_PATH_LENGTH = 45
+MIN_ZONE_PENALTY = 1
+MAX_ZONE_PENALTY = 4
 
 
 def build_penalty_zones(m, time_zone_count=5, cost_zone_count=5):
@@ -19,8 +21,8 @@ def build_penalty_zones(m, time_zone_count=5, cost_zone_count=5):
     time_cells = cells[:time_cells_end]
     cost_cells = cells[time_cells_end:cost_cells_end]
 
-    time_penalties = {cell: random.randint(1, 4) for cell in time_cells}
-    cost_penalties = {cell: random.randint(1, 4) for cell in cost_cells}
+    time_penalties = {cell: random.randint(MIN_ZONE_PENALTY, MAX_ZONE_PENALTY) for cell in time_cells}
+    cost_penalties = {cell: random.randint(MIN_ZONE_PENALTY, MAX_ZONE_PENALTY) for cell in cost_cells}
     return time_penalties, cost_penalties
 
 # --- create maze ---
