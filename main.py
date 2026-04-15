@@ -1,21 +1,72 @@
+import random
 from pyamaze import maze, agent
 from utils import to_path
-from ga import run_ga
+from ga import run_ga, evaluate_population, extract_solutions
+
+GA_GENERATIONS = 40
+GA_POPULATION_SIZE = 40
+GA_MAX_PATH_LENGTH = 45
+MIN_ZONE_PENALTY = 1
+MAX_ZONE_PENALTY = 4
+
+
+def build_penalty_zones(m, time_zone_count=5, cost_zone_count=5):
+    start = (m.rows, m.cols)
+    goal = (1, 1)
+    cells = [cell for cell in m.grid if cell not in (start, goal)]
+    random.shuffle(cells)
+
+    time_cells_end = min(time_zone_count, len(cells))
+    cost_cells_end = min(time_cells_end + cost_zone_count, len(cells))
+    time_cells = cells[:time_cells_end]
+    cost_cells = cells[time_cells_end:cost_cells_end]
+
+    time_penalties = {cell: random.randint(MIN_ZONE_PENALTY, MAX_ZONE_PENALTY) for cell in time_cells}
+    cost_penalties = {cell: random.randint(MIN_ZONE_PENALTY, MAX_ZONE_PENALTY) for cell in cost_cells}
+    return time_penalties, cost_penalties
 
 # --- create maze ---
 m = maze(5, 5)
 m.CreateMaze()
 
-best_moves = run_ga(m)
+final_population = run_ga(
+    m,
+    generations=GA_GENERATIONS,
+    population_size=GA_POPULATION_SIZE,
+    max_path_length=GA_MAX_PATH_LENGTH,
+)
+time_penalties, cost_penalties = build_penalty_zones(m)
+evaluations = evaluate_population(final_population, m, time_penalties, cost_penalties)
+solutions = extract_solutions(evaluations)
 
-# --- agent ---
-a = agent(m, footprints=True)
+if not all(solution["reached_goal"] for solution in solutions.values()):
+    print("Warning: one or more extracted paths did not reach the goal.")
 
-# --- build path ---
-path = to_path(best_moves, m)
+fastest_path = to_path(solutions["fastest"]["moves"], m)
+cheapest_path = to_path(solutions["cheapest"]["moves"], m)
+balanced_path = to_path(solutions["balanced"]["moves"], m)
 
-print("Path:", path)
+print("\nExtracted solutions from a SINGLE evolution")
+print(f"Final population size: {len(final_population)}")
+print(
+    f"Fastest Path   -> Time: {solutions['fastest']['total_time']}, Cost: {solutions['fastest']['total_cost']}"
+)
+print(
+    f"Cheapest Path  -> Time: {solutions['cheapest']['total_time']}, Cost: {solutions['cheapest']['total_cost']}"
+)
+print(
+    f"Balanced Path  -> Time: {solutions['balanced']['total_time']}, Cost: {solutions['balanced']['total_cost']}"
+)
 
-# --- test ---
-m.tracePath({a: path})
+fastest_agent = agent(m, footprints=True, color="red")
+cheapest_agent = agent(m, footprints=True, color="green")
+balanced_agent = agent(m, footprints=True, color="blue")
+
+m.tracePath(
+    {
+        fastest_agent: fastest_path,
+        cheapest_agent: cheapest_path,
+        balanced_agent: balanced_path,
+    }
+)
 m.run()
