@@ -1,7 +1,7 @@
 import random
 from utils import move
 
-GOAL_REACHED_BONUS = -5
+GOAL_REACHED_FITNESS_ADJUSTMENT = -5
 ELITE_RATIO = 0.2
 
 def trace_moves(moves, m):
@@ -60,7 +60,7 @@ def fitness(moves, m):
     goal = (1, 1)
     distance = abs(end_pos[0] - goal[0]) + abs(end_pos[1] - goal[1])
     revisit_penalty = len(cells) - len(set(cells))
-    goal_bonus = GOAL_REACHED_BONUS if reached_goal else 0
+    goal_bonus = GOAL_REACHED_FITNESS_ADJUSTMENT if reached_goal else 0
     return distance + 0.2 * revisit_penalty + goal_bonus
 
 
@@ -102,8 +102,11 @@ def run_ga(m, generations=30, population_size=20, max_path_length=40):
         scores.sort(key=lambda x: x[1])
         print(f"Gen {gen} Best:", scores[0][1])
 
-        elite_count = min(max(1, int(population_size * ELITE_RATIO)), max(1, population_size - 1))
+        desired_elites = max(1, int(population_size * ELITE_RATIO))
+        max_elites = max(1, population_size - 1)
+        elite_count = min(desired_elites, max_elites)
         elites = [list(moves) for moves, _ in scores[:elite_count]]
+        # Keep one slot for an immigrant to preserve exploration diversity.
         children_count = max(0, population_size - elite_count - 1)
         children = crossover(elites, population_size=children_count)
         children = mutate(children, m)

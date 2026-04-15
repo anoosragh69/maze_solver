@@ -3,6 +3,10 @@ from pyamaze import maze, agent
 from utils import to_path
 from ga import run_ga, evaluate_population, extract_solutions
 
+GA_GENERATIONS = 40
+GA_POPULATION_SIZE = 40
+GA_MAX_PATH_LENGTH = 45
+
 
 def build_penalty_zones(m, time_zone_count=5, cost_zone_count=5):
     start = (m.rows, m.cols)
@@ -23,7 +27,12 @@ def build_penalty_zones(m, time_zone_count=5, cost_zone_count=5):
 m = maze(5, 5)
 m.CreateMaze()
 
-final_population = run_ga(m, generations=40, population_size=40, max_path_length=45)
+final_population = run_ga(
+    m,
+    generations=GA_GENERATIONS,
+    population_size=GA_POPULATION_SIZE,
+    max_path_length=GA_MAX_PATH_LENGTH,
+)
 time_penalties, cost_penalties = build_penalty_zones(m)
 evaluations = evaluate_population(final_population, m, time_penalties, cost_penalties)
 solutions = extract_solutions(evaluations)
