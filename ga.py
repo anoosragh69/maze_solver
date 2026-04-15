@@ -44,7 +44,7 @@ def repair_moves(moves, m, max_steps=40):
     repaired = []
 
     for d in moves[:max_steps]:
-        valid_dirs = [direction for direction in "ESNW" if m.maze_map[pos][direction] == 1]
+        valid_dirs = [d for d in "ESNW" if m.maze_map[pos][d] == 1]
         if not valid_dirs:
             break
         chosen = d if d in valid_dirs else random.choice(valid_dirs)
@@ -95,7 +95,7 @@ def mutate(population, m, rate=0.2):
 
 
 def run_ga(m, generations=30, population_size=20, max_path_length=40):
-    population_size = max(2, population_size)
+    population_size = max(3, population_size)
     population = [generate_valid_moves(m, steps=max_path_length) for _ in range(population_size)]
 
     for gen in range(generations):
@@ -125,6 +125,7 @@ def evaluate_population(population, m, time_penalties, cost_penalties, invalid_p
     for moves in population:
         cells, _, reached_goal = trace_moves(moves, m)
         steps = max(0, len(cells) - 1)
+        # Exclude the start cell from penalties; only traversed maze regions add penalties.
         time_penalty = sum(time_penalties.get(cell, 0) for cell in cells[1:])
         cost_penalty = sum(cost_penalties.get(cell, 0) for cell in cells[1:])
         total_time = steps + time_penalty
