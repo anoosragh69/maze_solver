@@ -101,8 +101,10 @@ def run_ga(m, generations=30, population_size=20, chromosome_steps=40):
         print(f"Gen {gen} Best:", scores[0][1])
 
         elite_count = max(2, population_size // 5)
+        elite_count = min(elite_count, max(1, population_size - 1))
         elites = [list(moves) for moves, _ in scores[:elite_count]]
-        children = crossover(elites, population_size=population_size - elite_count - 1)
+        children_count = max(0, population_size - elite_count - 1)
+        children = crossover(elites, population_size=children_count)
         children = mutate(children, m)
         immigrant = generate_valid_moves(m, steps=chromosome_steps)
 
@@ -140,7 +142,9 @@ def evaluate_population(population, m, time_penalties, cost_penalties, invalid_p
 
 
 def extract_solutions(evaluations):
-    valid_pool = [item for item in evaluations if item["reached_goal"]] or evaluations
+    valid_pool = [item for item in evaluations if item["reached_goal"]]
+    if not valid_pool:
+        valid_pool = evaluations
     return {
         "fastest": min(valid_pool, key=lambda item: item["total_time"]),
         "cheapest": min(valid_pool, key=lambda item: item["total_cost"]),

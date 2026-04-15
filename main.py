@@ -10,8 +10,10 @@ def build_penalty_zones(m, time_zone_count=5, cost_zone_count=5):
     cells = [cell for cell in m.grid if cell not in (start, goal)]
     random.shuffle(cells)
 
-    time_cells = cells[: min(time_zone_count, len(cells))]
-    cost_cells = cells[min(time_zone_count, len(cells)) : min(time_zone_count + cost_zone_count, len(cells))]
+    time_cells_end = min(time_zone_count, len(cells))
+    cost_cells_end = min(time_cells_end + cost_zone_count, len(cells))
+    time_cells = cells[:time_cells_end]
+    cost_cells = cells[time_cells_end:cost_cells_end]
 
     time_penalties = {cell: random.randint(1, 4) for cell in time_cells}
     cost_penalties = {cell: random.randint(1, 4) for cell in cost_cells}
