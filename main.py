@@ -39,6 +39,9 @@ time_penalties, cost_penalties = build_penalty_zones(m)
 evaluations = evaluate_population(final_population, m, time_penalties, cost_penalties)
 solutions = extract_solutions(evaluations)
 
+if not all(solution["reached_goal"] for solution in solutions.values()):
+    print("Warning: one or more extracted paths did not reach the goal.")
+
 fastest_path = to_path(solutions["fastest"]["moves"], m)
 cheapest_path = to_path(solutions["cheapest"]["moves"], m)
 balanced_path = to_path(solutions["balanced"]["moves"], m)

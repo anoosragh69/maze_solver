@@ -76,6 +76,7 @@ def crossover(parents, population_size=20):
         min_len = min(len(p1), len(p2))
 
         if min_len < 2:
+            # Too short to split safely; keep a full valid parent path instead.
             child = list(p1 if len(p1) >= len(p2) else p2)
         else:
             cut = random.randint(1, min_len - 1)
@@ -105,6 +106,7 @@ def run_ga(m, generations=30, population_size=20, max_path_length=40):
         print(f"Gen {gen} Best:", scores[0][1])
 
         desired_elites = max(1, int(population_size * ELITE_RATIO))
+        # Reserve two slots for diversity: at least one child and one immigrant.
         max_elites = max(1, population_size - 2)
         elite_count = min(desired_elites, max_elites)
         elites = [list(moves) for moves, _ in scores[:elite_count]]
@@ -152,6 +154,7 @@ def evaluate_population(population, m, time_penalties, cost_penalties, invalid_p
 def extract_solutions(evaluations):
     valid_pool = [item for item in evaluations if item["reached_goal"]]
     if not valid_pool:
+        print("Warning: no chromosome reached the goal; using penalized fallback solutions.")
         valid_pool = evaluations
     return {
         "fastest": min(valid_pool, key=lambda item: item["total_time"]),
