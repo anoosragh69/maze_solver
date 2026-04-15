@@ -1,6 +1,8 @@
 import random
 from utils import move
 
+GOAL_REACHED_BONUS = -5
+ELITE_RATIO = 0.2
 
 def trace_moves(moves, m):
     pos = (m.rows, m.cols)
@@ -58,7 +60,7 @@ def fitness(moves, m):
     goal = (1, 1)
     distance = abs(end_pos[0] - goal[0]) + abs(end_pos[1] - goal[1])
     revisit_penalty = len(cells) - len(set(cells))
-    goal_bonus = -5 if reached_goal else 0
+    goal_bonus = GOAL_REACHED_BONUS if reached_goal else 0
     return distance + 0.2 * revisit_penalty + goal_bonus
 
 
@@ -91,26 +93,25 @@ def mutate(population, m, rate=0.2):
     return population
 
 
-def run_ga(m, generations=30, population_size=20, chromosome_steps=40):
-    population = [generate_valid_moves(m, steps=chromosome_steps) for _ in range(population_size)]
+def run_ga(m, generations=30, population_size=20, max_path_length=40):
+    population = [generate_valid_moves(m, steps=max_path_length) for _ in range(population_size)]
 
     for gen in range(generations):
-        population = [repair_moves(chrom, m, max_steps=chromosome_steps) for chrom in population]
+        population = [repair_moves(chrom, m, max_steps=max_path_length) for chrom in population]
         scores = [(moves, fitness(moves, m)) for moves in population]
         scores.sort(key=lambda x: x[1])
         print(f"Gen {gen} Best:", scores[0][1])
 
-        elite_count = max(2, population_size // 5)
-        elite_count = min(elite_count, max(1, population_size - 1))
+        elite_count = min(max(1, int(population_size * ELITE_RATIO)), max(1, population_size - 1))
         elites = [list(moves) for moves, _ in scores[:elite_count]]
         children_count = max(0, population_size - elite_count - 1)
         children = crossover(elites, population_size=children_count)
         children = mutate(children, m)
-        immigrant = generate_valid_moves(m, steps=chromosome_steps)
+        immigrant = generate_valid_moves(m, steps=max_path_length)
 
         population = elites + children + [immigrant]
 
-    return [repair_moves(chrom, m, max_steps=chromosome_steps) for chrom in population]
+    return [repair_moves(chrom, m, max_steps=max_path_length) for chrom in population]
 
 
 def evaluate_population(population, m, time_penalties, cost_penalties, invalid_penalty=1000):

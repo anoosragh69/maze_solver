@@ -23,7 +23,7 @@ def build_penalty_zones(m, time_zone_count=5, cost_zone_count=5):
 m = maze(5, 5)
 m.CreateMaze()
 
-final_population = run_ga(m, generations=40, population_size=40, chromosome_steps=45)
+final_population = run_ga(m, generations=40, population_size=40, max_path_length=45)
 time_penalties, cost_penalties = build_penalty_zones(m)
 evaluations = evaluate_population(final_population, m, time_penalties, cost_penalties)
 solutions = extract_solutions(evaluations)
