@@ -13,7 +13,7 @@
 \onehalfspacing
 
 \section*{Abstract}
-This report presents a maze-solving system built with a Genetic Algorithm (GA). The maze is generated using \texttt{pyamaze}, and candidate movement sequences are evolved over generations to produce valid paths from the start cell \((rows, cols)\) to the goal cell \((1,1)\). In addition to path feasibility, the project evaluates solution quality under two objectives: travel time and traversal cost. The final system extracts and visualizes three representative solutions from a single evolved population: fastest, cheapest, and balanced.
+This report presents a maze-solving system built with a Genetic Algorithm (GA). The maze is generated using \texttt{pyamaze}, and candidate movement sequences are evolved over generations to produce valid paths from the start cell \((rows, cols)\) to the goal cell \((1,1)\). In addition to path feasibility, the project evaluates solution quality under two primary objectives: travel time and traversal cost. The final system extracts and visualizes three representative solutions from a single evolved population: fastest, cheapest, and a balanced path based on the combined objective \((time + cost)\).
 
 \section{Problem Statement}
 The objective is to discover valid and diverse paths through a generated maze while handling multi-objective trade-offs:
@@ -97,7 +97,7 @@ The design achieves:
 \section{Limitations and Future Work}
 \begin{itemize}
     \item Performance can vary across runs due to stochastic evolution.
-    \item Objective optimization is post-processing based; a true multi-objective GA (e.g., Pareto ranking) could improve trade-off quality.
+    \item Objective optimization is based on post-processing; a true multi-objective GA (e.g., Pareto ranking) could improve trade-off quality.
     \item Additional constraints (energy, risk, dynamic obstacles) can extend realism.
     \item Parameter tuning or adaptive mutation may improve convergence reliability.
 \end{itemize}
