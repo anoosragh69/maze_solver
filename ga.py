@@ -12,7 +12,7 @@ def generate_valid_moves(m, steps=100):
         d = random.choice(valid_dirs)
         moves.append(d)
         pos = move(pos, d)
-        if pos == (1, 1): # stop early if reached
+        if pos == (1, 1):
             break
 
     return moves
@@ -34,12 +34,8 @@ def fitness(moves, m):
     pos, path_len = run_path(moves, m)
     goal = (1,1)
 
-    # Manhattan distance to goal represents our "how close" measure
     dist = abs(pos[0]-goal[0]) + abs(pos[1]-goal[1])
     
-    # Fitness heavily prioritizes distance (finding goal).
-    # Path length is a minor penalty to keep paths reasonably sized, 
-    # but allows enough slack for diversity.
     score = dist * 1000 + path_len
     return score
 
@@ -70,9 +66,7 @@ def mutate(population, rate=0.2):
             chrom = population[i]
             if len(chrom) > 0:
                 idx = random.randint(0, len(chrom)-1)
-                # random replacement
                 chrom[idx] = random.choice(moves)
-                # randomly insert/remove to perturb path length
                 if random.random() < 0.5:
                     chrom.insert(idx, random.choice(moves))
                 elif len(chrom) > 1:
@@ -93,17 +87,13 @@ def run_ga(m, generations=100, population_size=100):
         if gen % 20 == 0:
             print(f"Gen {gen} Best Fitness: {best_fitness}")
 
-        # selection: keep top 20%
         top_count = max(2, population_size // 5)
         top = [moves for moves, _ in scores[:top_count]]
 
-        # crossover
         population = crossover(top, population_size)
 
-        # mutation (elitism: keep the best one safe)
         best_org = population[0]
         rest = mutate(population[1:], rate=0.3)
         population = [best_org] + rest
 
-    # Return the entire final population
     return population

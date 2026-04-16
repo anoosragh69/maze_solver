@@ -38,4 +38,11 @@ pip install -r requirements.txt
 python main.py
 ```
 
+The maze animation and the path comparison chart open together.
+If your Linux graphics stack does not open the chart window, check the saved file:
+
+```bash
+path_comparison.png
+```
+
 ---
