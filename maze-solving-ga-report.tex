@@ -1,0 +1,108 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\title{Maze Solver Using Genetic Algorithm\\Project Report}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+\onehalfspacing
+
+\section*{Abstract}
+This report presents a maze-solving system built with a Genetic Algorithm (GA). The maze is generated using \texttt{pyamaze}, and candidate movement sequences are evolved over generations to produce valid paths from the start cell \((rows, cols)\) to the goal cell \((1,1)\). In addition to path feasibility, the project evaluates solution quality under two objectives: travel time and traversal cost. The final system extracts and visualizes three representative solutions from a single evolved population: fastest, cheapest, and balanced.
+
+\section{Problem Statement}
+The objective is to discover valid and diverse paths through a generated maze while handling multi-objective trade-offs:
+\begin{itemize}
+    \item Reachability: path must reach the goal.
+    \item Time minimization: avoid high-time regions.
+    \item Cost minimization: avoid high-cost regions.
+    \item Balanced optimization: reduce combined time and cost.
+\end{itemize}
+
+\section{System Overview}
+The implementation consists of three modules:
+\begin{itemize}
+    \item \texttt{main.py}: maze creation, GA execution, valid-path extraction, objective evaluation, and visualization.
+    \item \texttt{ga.py}: chromosome generation, fitness computation, selection, crossover, mutation, and GA loop.
+    \item \texttt{utils.py}: movement handling, chromosome-to-path conversion, penalty-zone generation, and path evaluation.
+\end{itemize}
+
+\section{Genetic Algorithm Design}
+\subsection{Chromosome Representation}
+A chromosome is a list of movement symbols from \(\{N, S, E, W\}\). Each chromosome represents a candidate path policy from start to goal.
+
+\subsection{Initialization}
+The initial population is generated with random valid local moves from the current maze cell. The maximum chromosome length is set to:
+\[
+\texttt{max\_steps} = 2 \times (\texttt{rows} \times \texttt{cols})
+\]
+Generation stops early if the goal is reached.
+
+\subsection{Fitness Function}
+Fitness is computed as:
+\[
+\texttt{score} = 1000 \times d_{\text{Manhattan}}(\texttt{pos}, \texttt{goal}) + \texttt{path\_len}
+\]
+This strongly prioritizes goal proximity while mildly penalizing long trajectories.
+
+\subsection{Selection, Crossover, and Mutation}
+\begin{itemize}
+    \item \textbf{Selection:} top \(20\%\) of chromosomes by fitness are retained as parents.
+    \item \textbf{Crossover:} random cut points are selected on two parents and concatenated to form children.
+    \item \textbf{Mutation:} with configured rate, a random direction is replaced; optional insertion/deletion perturbs sequence length.
+    \item \textbf{Elitism:} the best chromosome is preserved each generation.
+\end{itemize}
+
+\section{Multi-Objective Path Evaluation}
+After GA evolution, only chromosomes that actually reach \((1,1)\) are retained as valid paths (duplicates removed). Each path is then evaluated over two penalty maps:
+\begin{itemize}
+    \item \textbf{Time zones}: high penalties in bottom-left quadrant.
+    \item \textbf{Cost zones}: high penalties in top-right quadrant.
+    \item \textbf{Center zone}: medium penalties for both, encouraging balanced trade-offs.
+\end{itemize}
+
+For each valid path:
+\[
+\texttt{balanced} = \texttt{time} + \texttt{cost}
+\]
+Three final representatives are selected:
+\begin{itemize}
+    \item Fastest path: minimum time.
+    \item Cheapest path: minimum cost.
+    \item Balanced path: minimum \((time + cost)\).
+\end{itemize}
+
+\section{Visualization and Output}
+The final three paths are displayed in the \texttt{pyamaze} UI using different agent colors:
+\begin{itemize}
+    \item Green: fastest
+    \item Cyan: cheapest
+    \item Red: balanced
+\end{itemize}
+This supports direct visual comparison of distinct optimization outcomes produced from one GA run.
+
+\section{Observations}
+The design achieves:
+\begin{itemize}
+    \item Feasible path discovery under high-loop mazes.
+    \item Diversity in final valid paths from a single evolved population.
+    \item Clear demonstration of objective conflict (time vs.\ cost) and trade-off selection.
+\end{itemize}
+
+\section{Limitations and Future Work}
+\begin{itemize}
+    \item Performance can vary across runs due to stochastic evolution.
+    \item Objective optimization is post-processing based; a true multi-objective GA (e.g., Pareto ranking) could improve trade-off quality.
+    \item Additional constraints (energy, risk, dynamic obstacles) can extend realism.
+    \item Parameter tuning or adaptive mutation may improve convergence reliability.
+\end{itemize}
+
+\section{Conclusion}
+This project demonstrates a practical GA-based maze solver that balances feasibility and multi-objective path quality. By separating path discovery from objective-specific ranking, it produces multiple meaningful solutions in one run and provides intuitive visual outputs for analysis.
+
+\end{document}
